@@ -1,0 +1,30 @@
+.booking-page {
+    padding: 40px 20px;
+    max-width: 800px;
+    margin: auto;
+    text-align: center;
+    background-color: var(--primary-yellow);
+    color: var(--primary-dark);
+  }
+
+  .booking-page h1 {
+    margin-bottom: 20px;
+    color: var(--primary-dark);
+  }
+
+  .booking-page p {
+    margin-bottom: 20px;
+    color: var(--secondary-dark);
+    font-size: 1.2em;
+  }
+
+  .reserve-form {
+    display: grid;
+    grid-gap: 20px;
+    max-width: 400px;
+    margin: auto;
+    padding: 20px;
+    background-color: var(--primary-light);
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
