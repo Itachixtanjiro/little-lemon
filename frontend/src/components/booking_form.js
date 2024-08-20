@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import '../component-styles/booking-form.css';
+import '../component_styles/booking_form.css';
 import { fetchAPI } from '../api/api';
 
 function BookingForm({ availableTimes = [], dispatch, onSubmit }) {

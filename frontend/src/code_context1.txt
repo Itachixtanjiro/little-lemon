@@ -1,0 +1,367 @@
+// File: pages/booking_page.js
+import React, { useReducer, useEffect } from 'react';
+import BookingForm from '../components/booking_form';
+import '../component_styles/booking_page.css';
+import { useNavigate } from 'react-router-dom';
+import { fetchAPI, submitAPI } from '../api/api';
+
+const updateTimes = (state, action) => {
+    switch (action.type) {
+        case 'date_change':
+            return Array.isArray(action.times) ? action.times : state;
+        default:
+            return state;
+    }
+};
+
+const initializeTimes = () => {
+    const today = new Date();
+    return fetchAPI(today);
+};
+
+function BookingPage() {
+    const [availableTimes, dispatch] = useReducer(updateTimes, initializeTimes());
+    const navigate = useNavigate();
+
+    const submitForm = async (formData) => {
+        console.log(formData)
+        const success = await submitAPI(formData);
+        if (success) {
+            navigate('/confirmed');
+        } else {
+            alert('Reservation failed.');
+        }
+    };
+
+    useEffect(() => {
+        const fetchInitialTimes = async () => {
+            const today = new Date();
+            const times = await fetchAPI(today);
+            dispatch({ type: 'date_change', times });
+        };
+        fetchInitialTimes();
+    }, []);
+
+    return (
+        <div className="booking-page">
+            <h2>Reserve a Table at Little Lemon</h2>
+            <p>We are excited to have you dine with us! Please fill out the form below to make your reservation.</p>
+            <BookingForm availableTimes={availableTimes} dispatch={dispatch} onSubmit={submitForm} />
+            <p>If you have any special requests, feel free to contact us directly after submitting your reservation.</p>
+        </div>
+    );
+}
+
+export default BookingPage;
+// File: pages/special_items.js
+import React from 'react';
+import '../component_styles/special_items.css';
+import { Link } from 'react-router-dom';
+import restauranfood from '../../assets/restauranfood.jpg';
+import greek_salad from '../../assets/greek_salad.jpg';
+import bruchetta from '../../assets/bruchetta.svg';
+import lemon_dessert from '../../assets/lemon_dessert.svg';
+
+function Specials() {
+    return (
+        <>
+            <div className="grid-container specials">
+                <div className="column">
+                    <h1 className="h1" style={{ color: 'var(--primary-yellow)' }}>Little Lemon</h1>
+                    <h2>Chicago</h2>
+                    <p className="lead-text">We are a family-owned Mediterranean restaurant, focused on traditional recipes served with a modern twist.</p>
+                    <Link to="/reserve">
+                        <button className="highlight">Reserve a Table</button>
+                    </Link>
+                </div>
+                <div className="column column-2">
+                    <img src={restauranfood} alt='Restaurant food' className='logo-img' />
+                </div>
+            </div>
+
+            <section className='weekly-specials'>
+                <div className="grid-container">
+                    <div className="column column-1">
+                        <h2 className="section-title">This week's specials!</h2>
+                    </div>
+                    <div className="column column-2">
+                        <button className="highlight" style={{ marginTop: 8 }} >Online Menu</button>
+                    </div>
+                </div>
+                <div className='specials-grid'>
+                    <div className='special'>
+                        <img src={greek_salad} alt='Greek Salad' className='logo-img' />
+                        <div className="price-delivery">
+                            <p className="card-title">Greek Salad</p>
+                            <p className="price">$12.99</p>
+                        </div>
+                        <p>This famous Greek salad of crispy lettuce, peppers, olives, and  Chicago-style feta cheese, garnished with crunchy garlic and rosemary croutons.</p>
+                        <p className="delivery">Order a delivery &#x1F6F4;</p>
+                    </div>
+                    <div className='special'>
+                        <img src={bruchetta} alt='Bruschetta' className='logo-img' />
+                        <div className="price-delivery">
+                            <p className="card-title">Bruschetta</p>
+                            <p className="price">$5.99</p>
+                        </div>
+                        <p>Our Bruschetta is made from grilled bread that has been smeared with garlic and seasoned with salt and olive oil.</p>
+                        <p className="delivery">Order a delivery &#x1F6F4;</p>
+
+                    </div>
+                    <div className='special'>
+                        <img src={lemon_dessert} alt='Lemon Dessert' style={{ height: 200 }} className='logo-img' />
+                        <div className="price-delivery">
+                            <p className="card-title">Lemon Dessert</p>
+                            <p className="price">$5.00</p>
+                        </div>
+                        <p>This comes straight from grandma’s recipe book, every last ingredient has been sourced and is as authentic as can be imagined.</p>
+                        <p className="delivery">Order a delivery &#x1F6F4;</p>
+                    </div>
+                </div>
+            </section>
+        </>
+    );
+}
+
+export default Specials;
+// File: components/booking_form.js
+import React, { useState, useEffect } from 'react';
+import '../component_styles/booking_form.css';
+import { fetchAPI } from '../api/api';
+
+function BookingForm({ availableTimes = [], dispatch, onSubmit }) {
+    const [name, setName] = useState('');
+    const [date, setDate] = useState('');
+    const [time, setTime] = useState('');
+    const [guests, setGuests] = useState(1);
+    const [occasion, setOccasion] = useState('Birthday');
+    const [touched, setTouched] = useState({
+        name: false,
+        date: false,
+        time: false,
+        guests: false
+    });
+    const [errors, setErrors] = useState({});
+    const [isFormValid, setIsFormValid] = useState(false);
+
+    useEffect(() => {
+        if (date) {
+            const fetchTimes = async () => {
+                const times = await fetchAPI(new Date(date));
+                dispatch({ type: 'date_change', times });
+            };
+            fetchTimes();
+        }
+    }, [date, dispatch]);
+
+    useEffect(() => {
+
+        const newErrors = {};
+        if (touched.name && name.trim() === '') newErrors.name = 'Name is required.';
+        if (touched.date && date.trim() === '') newErrors.date = 'Date is required.';
+        if (touched.time && time.trim() === '') newErrors.time = 'Time is required.';
+        if (touched.guests && (guests <= 0 || guests > 10)) newErrors.guests = 'Number of guests must be between 1 and 10.';
+
+        setErrors(newErrors);
+        setIsFormValid(Object.keys(newErrors).length === 0);
+    }, [name, date, time, guests, touched]);
+
+    const handleBlur = (field) => {
+        setTouched((prev) => ({ ...prev, [field]: true }));
+    };
+
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        const formData = {
+            name,
+            date,
+            time,
+            guests,
+            occasion
+        };
+        onSubmit(formData);
+
+
+        setName('');
+        setDate('');
+        setTime('');
+        setGuests(1);
+        setOccasion('Birthday');
+        setTouched({
+            name: false,
+            date: false,
+            time: false,
+            guests: false
+        });
+    };
+
+    return (
+        <form
+            className="reserve-form"
+            onSubmit={handleSubmit}
+            style={{ display: 'grid', maxWidth: '300px', gap: '20px' }}
+            aria-label="Booking Form"
+        >
+            <label htmlFor="res-name">Name:</label>
+            <input
+                type="text"
+                id="res-name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                onBlur={() => handleBlur('name')}
+                required
+                aria-required="true"
+                aria-label="Enter your name"
+            />
+            {touched.name && errors.name && (
+                <p className="error-message" aria-live="polite">{errors.name}</p>
+            )}
+
+            <label htmlFor="res-date">Choose date:</label>
+            <input
+                type="date"
+                id="res-date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                onBlur={() => handleBlur('date')}
+                min={new Date().toISOString().split('T')[0]}
+                required
+                aria-required="true"
+                aria-label="Select the reservation date"
+            />
+            {touched.date && errors.date && (
+                <p className="error-message" aria-live="polite">{errors.date}</p>
+            )}
+
+            <label htmlFor="res-time">Choose time:</label>
+            <select
+                id="res-time"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+                onBlur={() => handleBlur('time')}
+                required
+                aria-required="true"
+                aria-label="Select the reservation time"
+            >
+                {availableTimes.length > 0 ? (
+                    availableTimes.map((time, index) => (
+                        <option key={index} value={time}>
+                            {time}
+                        </option>
+                    ))
+                ) : (
+                    <option value="">No available times</option>
+                )}
+            </select>
+            {touched.time && errors.time && (
+                <p className="error-message" aria-live="polite">{errors.time}</p>
+            )}
+
+            <label htmlFor="guests">Number of guests:</label>
+            <input
+                type="number"
+                id="guests"
+                value={guests}
+                onChange={(e) => setGuests(e.target.value)}
+                onBlur={() => handleBlur('guests')}
+                min="1"
+                max="10"
+                required
+                aria-required="true"
+                aria-label="Enter the number of guests"
+            />
+            {touched.guests && errors.guests && (
+                <p className="error-message" aria-live="polite">{errors.guests}</p>
+            )}
+
+            <label htmlFor="occasion">Occasion:</label>
+            <select
+                id="occasion"
+                value={occasion}
+                onChange={(e) => setOccasion(e.target.value)}
+                required
+                aria-required="true"
+                aria-label="Select the occasion"
+            >
+                <option value="Birthday">Birthday</option>
+                <option value="Engagement">Engagement</option>
+                <option value="Anniversary">Anniversary</option>
+            </select>
+
+            <button
+                type="submit"
+                className="booking-button"
+                disabled={!isFormValid}
+                aria-disabled={!isFormValid}
+                aria-label="Submit your reservation"
+            >
+                Make Your Reservation
+            </button>
+        </form>
+    );
+}
+
+export default BookingForm;
+// File: components/confirmation.js
+import React from 'react';
+
+function ConfirmedBooking() {
+    return (
+        <div style={{ textAlign: 'center', marginTop: '50px' }}>
+            <h2>Booking Confirmed!</h2>
+            <h4> Thank you for your reservation. We look forward to serving you!</h4>
+        </div>
+    );
+}
+
+export default ConfirmedBooking;
+// File: components/footer.js
+import React from 'react';
+import '../componen_styles/footer.css';
+
+function Footer() {
+    return (
+        <footer className='footer'>
+            <p>&copy; 2024 Little Lemon. All rights reserved.</p>
+        </footer>
+    );
+}
+
+export default Footer;
+// File: components/header.js
+import React from 'react';
+import logo from '../../assets/Logo.svg';
+import '../component_styles/header.css';
+import Nav from '../components/navbar';
+
+function Header() {
+    return (
+        <header className='header'>
+            <div className='logo'>
+                <img src={logo}  alt='Little Lemon Logo' className='logo-img'/>
+            </div>
+            <Nav />
+        </header>
+
+    );
+}
+export default Header;
+// File: components/navbar.js
+import React from 'react';
+import '../component_styles/navbar.css';
+
+function Nav() {
+    return (
+            <nav className='nav'>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#services">Menu</a></li>
+                    <li><a href="/reserve">Reservations</a></li>
+                    <li><a href="#services">Order Online</a></li>
+                    <li><a href="#contact">Login</a></li>
+                </ul>
+            </nav>
+    );
+}
+export default Nav;

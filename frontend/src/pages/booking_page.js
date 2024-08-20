@@ -1,6 +1,6 @@
 import React, { useReducer, useEffect } from 'react';
-import BookingForm from '../components/booking-form';
-import 'frontend/src/component-styles/booking-page.css';
+import BookingForm from '../components/booking_form';
+import '../component_styles/booking_page.css';
 import { useNavigate } from 'react-router-dom';
 import { fetchAPI, submitAPI } from '../api/api';
 

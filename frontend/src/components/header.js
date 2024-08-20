@@ -1,6 +1,6 @@
 import React from 'react';
-import logo from './frontend/assets/Logo .svg';
-import '../component-styles/header.css';
+import logo from '../assets/Logo.svg';
+import '../component_styles/header.css';
 import Nav from '../components/navbar';
 
 function Header() {

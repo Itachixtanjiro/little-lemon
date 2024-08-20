@@ -1,10 +1,10 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Header from './Header';
-import Specials from './Specials';
-import BookingPage from './BookingPage';
-import Footer from './Footer';
-import ConfirmedBooking from './ConfirmedBooking';
+import Header from './components/header';
+import Specials from './pages/special_items';
+import BookingPage from './pages/booking_page';
+import Footer from './components/footer';
+import ConfirmedBooking from './components/confirmation';
 import './App.css';
 
 function App() {

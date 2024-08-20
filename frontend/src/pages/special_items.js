@@ -1,10 +1,11 @@
 import React from 'react';
-import '../component-styles/special-item.css';
+import '../component_styles/special_item.css';
 import { Link } from 'react-router-dom';
-import restauranfood from 'frontend/assets/restauranfood.jpg';
-import greek_salad from 'frontend/assets/greek salad.jpg';
-import bruchetta from 'frontend/assets/bruchetta.svg';
-import lemon_dessert from 'frontend/assets/lemon dessert.jpg';
+import restauranfood from '../assets/restauranfood.jpg';
+import greek_salad from '../assets/greek_salad.jpg';
+import bruchetta from '../assets/bruchetta.svg';
+import lemon_dessert from '../assets/lemon dessert.jpg';
+
 
 function Specials() {
     return (
